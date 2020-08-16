@@ -34,6 +34,7 @@ import datetime
 from collections import OrderedDict
 import binascii
 import json
+import copy
 from asgiref.sync import async_to_sync
 import ffxivbot.handlers as handlers
 from ffxivbot.models import *
@@ -52,12 +53,67 @@ CONFIG_PATH = os.environ.get(
 LOGGER = logging.getLogger(__name__)
 
 
+def transfer_share(share_data):
+    return package_text("{}\n{}\n{}".format(
+                        share_data["title"],
+                        share_data["content"],
+                        share_data["url"],))
+
+
+def package_text(text):
+    return {
+        "type": "text",
+        "data": {
+            "text": text,
+        },
+    }
+
+
+def judge_text_length(text):
+    lines = text.split('\n')
+    texts = []
+    if len(lines) < 7:
+        texts.append(text)
+    else:
+        i = 0
+        tempmsg = ""
+        for line in lines:
+            if i <= 7:
+                tempmsg = tempmsg + line + "\n"
+                i = i + 1
+            else:
+                tempmsg = tempmsg + line + "\n"
+                texts.append(tempmsg)
+                i = 0
+                tempmsg = ""
+        if tempmsg != "":
+            texts.append(tempmsg)
+    return texts
+
+
+def transfer_long_text(msg):
+    msgs = []
+    data = msg["data"]
+    if data:
+        text = data["text"]
+        if text:
+            texts = judge_text_length(text)
+            for frag in texts:
+                msgs.append(package_text(frag))
+    if len(msgs) == 0:
+        msgs.append(msg)
+    return msgs
+
+
 def handle_message(bot, message):
-    new_message = message
-    if isinstance(message, list):
-        new_message = []
-        for idx, msg in enumerate(message):
-            if msg["type"] == "share" and bot.share_banned:
+
+    if isinstance(message, str):
+        message = package_text(message)
+    if not isinstance(message, list):
+        message = [message]
+    new_message = []
+    for idx, msg in enumerate(message):
+        if msg["type"] == "share" and bot.share_banned:
                 share_data = msg["data"]
                 # new_message.append(
                 #     {
@@ -68,36 +124,37 @@ def handle_message(bot, message):
                 #         },
                 #     }
                 # )
-                new_message.append(
-                    {
-                        "type": "text",
-                        "data": {
-                            "text": "{}\n{}\n{}".format(
-                                share_data["title"],
-                                share_data["content"],
-                                share_data["url"],
-                            )
-                        },
-                    }
-                )
-            else:
-                new_message.append(msg)
+                msg = transfer_share(share_data)
+        if msg["type"] == "text":
+            new_message.extend(transfer_long_text(msg))
+        else:
+            new_message.append(msg)
     return new_message
 
 
 def call_api(bot, action, params, echo=None, **kwargs):
     if "async" not in action and not echo:
         action = action + "_async"
+    messages = []
     if "send_" in action and "_msg" in action:
-        params["message"] = handle_message(bot, params["message"])
-    jdata = {"action": action, "params": params}
-    if echo:
-        jdata["echo"] = echo
+        messages = handle_message(bot, params["message"])
+    jdatas = []
+    if messages:
+        for message in messages:
+            tmpparam = copy.deepcopy(params)
+            tmpparam["message"] = message
+            jdata = {"action": action, "params": tmpparam}
+            if echo:
+                jdata["echo"] = echo
+            jdatas.append(jdata)
+    else:
+        jdatas.append({"action": action, "params": params})
     post_type = kwargs.get("post_type", "websocket")
     if post_type == "websocket":
-        async_to_sync(channel_layer.send)(
-            bot.api_channel_name, {"type": "send.event", "text": json.dumps(jdata)}
-        )
+        for jdata in jdatas:
+            async_to_sync(channel_layer.send)(
+                bot.api_channel_name, {"type": "send.event", "text": json.dumps(jdata)}
+            )
     elif post_type == "http":
         url = os.path.join(
             bot.api_post_url, "{}?access_token={}".format(action, bot.access_token)
