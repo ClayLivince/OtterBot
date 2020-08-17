@@ -49,7 +49,7 @@ LOGGER = logging.getLogger(__name__)
 
 
 class PikaConsumer(object):
-    """This is based on the example consumer at 
+    """This is based on the example consumer at
     https://github.com/pika/pika/blob/master/examples/asynchronous_consumer_example.py
     """
 
@@ -175,8 +175,6 @@ class PikaConsumer(object):
             except QQBot.DoesNotExist as e:
                 LOGGER.error("bot {} does not exsit.".format(self_id))
                 raise e
-            api_caller = ApiCaller(bot)
-            event_handler = EventHandler(bot, api_caller)
             config = json.load(open(CONFIG_PATH, encoding="utf-8"))
             already_reply = False
             if (
