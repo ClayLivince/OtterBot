@@ -175,6 +175,8 @@ class PikaConsumer(object):
             except QQBot.DoesNotExist as e:
                 LOGGER.error("bot {} does not exsit.".format(self_id))
                 raise e
+            api_caller = ApiCaller(bot)
+            event_handler = EventHandler(bot, api_caller)
             config = json.load(open(CONFIG_PATH, encoding="utf-8"))
             already_reply = False
             if (
