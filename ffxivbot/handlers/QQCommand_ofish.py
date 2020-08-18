@@ -7,6 +7,7 @@ import time
 import datetime
 import math
 
+# fmt: off
 pattern =  [1,4,2,5,3,6,1,4,2,5,3,6,
             4,1,5,2,6,3,4,1,5,2,6,3,
             2,5,3,6,1,4,2,5,3,6,1,4,
@@ -22,6 +23,7 @@ schedules = ["梅尔托尔海峡南(夜)-加拉迪翁湾外海(日)-梅尔托尔
             "加拉迪翁湾外海(夜)-梅尔托尔海峡南(日)- 罗塔诺海海面(夕)",
             "加拉迪翁湾外海(日)-梅尔托尔海峡南(夕)- 罗塔诺海海面(夜)",
             "加拉迪翁湾外海(夕)-梅尔托尔海峡南(夜)- 罗塔诺海海面(日)"]
+# fmt: on
 
 # Modified from http://fish.senriakane.com/ocean.html
 def QQCommand_ofish(*args, **kwargs):
@@ -116,19 +118,19 @@ def QQCommand_ofish(*args, **kwargs):
             pQ = 3
             text = "梅尔托尔海峡北晚班（海龙成就 + ※珊瑚蝠鲼）"
             msg = extract_route(rN, pQ, text)
-            msg += "\n查宏后面加个宏字，e.g./ofish xx成就宏"
+            msg += "\n查宏前面加个宏字，e.g./ofish 宏xx成就"
         elif command.startswith("海马成就"):
             rN = 1
             pQ = 3
             text = "梅尔托尔海峡北晚班（海龙成就 + ※珊瑚蝠鲼）"
             msg = extract_route(rN, pQ, text)
-            msg += "\n查宏后面加个宏字，e.g./ofish xx成就宏"
+            msg += "\n查宏前面加个宏字，e.g./ofish 宏xx成就"
         elif command.startswith("章鱼成就"):
             rN = 2
             pQ = 3
             text = "梅尔托尔海峡北早班（章鱼成就）"
             msg = extract_route(rN, pQ, text)
-            msg += "\n查宏后面加个宏字，e.g./ofish xx成就宏"
+            msg += "\n查宏前面加个宏字，e.g./ofish 宏xx成就"
         elif command.startswith("依拉丝莫龙"):
             rN = 3
             pQ = 3
@@ -144,13 +146,13 @@ def QQCommand_ofish(*args, **kwargs):
             pQ = 3
             text = "罗塔诺海海面早班　（水母成就 + 冲分推荐）"
             msg = extract_route(rN, pQ, text)
-            msg += "\n查宏后面加个宏字，e.g./ofish xx成就宏"
+            msg += "\n查宏前面加个宏字，e.g./ofish 宏xx成就"
         elif command.startswith("鲨鱼成就"):
             rN = 6
             pQ = 3
             text = "罗塔诺海海面午班　（鲨鱼成就 + ※珊瑚蝠鲼）"
             msg = extract_route(rN, pQ, text)
-            msg += "\n查宏后面加个宏字，e.g./ofish xx成就宏"
+            msg += "\n查宏前面加个宏字，e.g./ofish 宏xx成就"
         elif command.startswith("珊瑚蝠鲼"):
             rN = 1
             pQ = 2
@@ -220,7 +222,7 @@ def QQCommand_ofish(*args, **kwargs):
 门票用刺螠钓，中等时长的中杆[!!]，实在不行可以开个专一
 (海里有像是甲胄反射的暗淡光辉！像是甲胄反射的暗淡光辉不见了……)
 时长1分钟，用磷虾"""
-        elif command.startswith("鲨鱼成就宏"):
+        elif command.startswith("宏鲨鱼成就"):
             msg = """---钓场一：加拉迪翁湾外海-黄昏---
 暴雨天气直接跳船。
 刺螠[!!!]→暗淡鲨，满GP可以开个专一，可能会歪到幻光巨齿鲨。满了还没遇到鲨鱼可以适当撒饵。
@@ -233,7 +235,7 @@ def QQCommand_ofish(*args, **kwargs):
 刺螠，双提24s前[!!!]→铬铁锤头鲨*4，24s后平提专一再双提，可能会歪到幻光鲈。
 幻海流中用刺螠，双提[!!!]→处刑者*4，平提[!!]→清道夫
 推荐连招：双重提钩-专一垂钓-双重提钩"""
-        elif command.startswith("章鱼成就宏"):
+        elif command.startswith("宏章鱼成就"):
             msg = """---钓场一：梅尔托尔海峡南-白天---
 保存GP，随便钓
 ——————————————————————————————
@@ -245,7 +247,7 @@ def QQCommand_ofish(*args, **kwargs):
 石沙蚕[!!!]精准提钩→幻光海马 触发幻海流
 幻海流中用磷虾，双提5s+[!!]→幻纱披风*4
 推荐连招：双重提钩-专一垂钓-双重提钩"""
-        elif command.startswith("海马成就宏"):
+        elif command.startswith("宏海马成就"):
             msg = """---钓场一：梅尔托尔海峡南-夜晚---
 薄雾、阴云天气直接跳船。
 石沙蚕，8s-16s的[!]→蓬松海龙，12s以上可以酌情双提
@@ -257,7 +259,7 @@ def QQCommand_ofish(*args, **kwargs):
 ---钓场三：梅尔托尔海峡北-黄昏---
 石沙蚕[!!!]精准提钩→幻光海马 触发幻海流，幻海流中双提5s以上的[!]→珊瑚海龙*4
 推荐连招：双重提钩-专一垂钓-双重提钩"""
-        elif command.startswith("水母成就宏"):
+        elif command.startswith("宏水母成就"):
             msg = """石沙蚕，认准4s[!]→拉诺西亚水母，自信双提
 建议使用宏：
 /ac 抛竿
@@ -275,36 +277,33 @@ def QQCommand_ofish(*args, **kwargs):
         logging.error(e)
     return action_list
 
-def extract_route(rN:int, pQ:int, text:str):
+
+def extract_route(rN: int, pQ: int, text: str):
     try:
         date = datetime.datetime.now()
         t = date.strftime("%Y-%m-%d 16:00:00")
-        ts = int(time.mktime(time.strptime(t, '%Y-%m-%d %H:%M:%S')))
-        currentTwoHourChunks = math.floor(ts / (60*60*2))
+        ts = int(time.mktime(time.strptime(t, "%Y-%m-%d %H:%M:%S")))
+        currentTwoHourChunks = math.floor(ts / (60 * 60 * 2))
         offset = 16
         temptime = currentTwoHourChunks % 72
         tries = 0
         matches = 0
         matchesTimes = []
 
-
-        while (matches < pQ and tries < pQ*20):
+        while matches < pQ and tries < pQ * 20:
             temp = currentTwoHourChunks + tries + offset
             if pattern[(temp % 72)] == rN:
                 matchesTimes.append(temp)
                 matches += 1
             tries += 1
-        
+
         i = 0
         temptext = ""
         while i < len(matchesTimes):
-            temppoop = datetime.datetime.fromtimestamp((matchesTimes[i] - offset) * (60 * 60 * 2))
-            temptext += (
-                temppoop.strftime("%Y-%m-%d %H:%M")
-                + "  "
-                + text
-                + "\n"
+            temppoop = datetime.datetime.fromtimestamp(
+                (matchesTimes[i] - offset) * (60 * 60 * 2)
             )
+            temptext += temppoop.strftime("%Y-%m-%d %H:%M") + "  " + text + "\n"
             i += 1
             msg = temptext[:-1]
     except Exception as e:
