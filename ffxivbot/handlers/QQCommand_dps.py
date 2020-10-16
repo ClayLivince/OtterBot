@@ -26,18 +26,18 @@ def QQCommand_dps(*args, **kwargs):
         msg = "dps command is halt due to "
 
         if receive_msg.find("help") == 0 or receive_msg == "":
-            msg = "1.  查询总排名\n\
-/dps [Boss] [职业] \n\
-2.  查询指定天数总排名\n\
-/dps [Boss] [职业] day#[天数] \n\
-3.  查询dps排名\n\
-/dps [Boss] [职业] [数值]\n\
-4.  查询指定天数dps排名\n\
-/dps [Boss] [职业] day#[天数] [数值]\n\
-5.  查询国服dps排名\n\
-/dps ... 国服\n\
-6.  查询rdps\n\
-/dps ... rdps"
+            msg = """1.  查询总排名
+/dps [Boss] [职业]
+2.  查询指定天数总排名
+/dps [Boss] [职业] day#[天数]
+3.  查询dps排名
+/dps [Boss] [职业] [数值]
+4.  查询指定天数dps排名
+/dps [Boss] [职业] day#[天数] [数值]
+5.  查询国服dps排名
+/dps ... 国服
+6.  查询rdps
+/dps ... rdps"""
         else:
             for boss in boss_list:
                 try:
