@@ -4,6 +4,7 @@ from .models import QQGroup, QQBot, QQUser
 from .api_caller import ApiCaller
 from handlers.QQUtils import text2img
 import handlers
+import traceback
 
 
 class EventHandler(object):
@@ -17,9 +18,8 @@ class EventHandler(object):
         already_reply = False
         user_id = receive["user_id"]
         if QQBot.objects.filter(user_id=user_id).exists():
-            raise Exception(
-                "{} reply from another bot:{}".format(receive["self_id"], user_id)
-            )
+            print("{} reply from another bot:{}".format(receive["self_id"], user_id))
+            return
         (user, created) = QQUser.objects.get_or_create(user_id=user_id)
         if 0 < time.time() < user.ban_till:
             raise Exception("User {} get banned till {}".format(user_id, user.ban_till))
@@ -73,9 +73,6 @@ class EventHandler(object):
                     if command_enable:
                         msg += "{}: {}\n".format(k, v)
                 msg = text2img(msg)
-                msg += "具体介绍详见Wiki使用手册: \n{}\n".format(
-                    "https://github.com/Bluefissure/OtterBot/wiki"
-                )
                 msg = msg.strip()
                 self.api_caller.send_message(
                     receive["message_type"],
@@ -185,9 +182,6 @@ class EventHandler(object):
                 if command_enable:
                     msg += "{}: {}\n".format(k, v)
             msg = text2img(msg)
-            msg += "具体介绍详见Wiki使用手册: \n{}\n".format(
-                "https://github.com/Bluefissure/OtterBot/wiki"
-            )
             msg = msg.strip()
             self.api_caller.send_message(
                 receive["message_type"],

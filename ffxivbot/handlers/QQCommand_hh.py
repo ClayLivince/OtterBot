@@ -138,7 +138,7 @@ def result_to_img(result, glamour_id, bot_version):
             msg = "[CQ:image,file=base64://{}]\n".format(base64_str)
         return msg
     except Exception as e:
-        return "Error: {},封面图丢失,请前往原地址查看\nhttps://www.ffxivsc.cn/page/glamour.html?glamourId={}".format(
+        return "Error: {},封面图加载大失败,请前往原地址查看\nhttps://www.ffxivsc.cn/page/glamour.html?glamourId={}".format(
             type(e), glamour_id
         )
 
@@ -161,7 +161,7 @@ def search_jr(job, race, sex, sort, time, bot_version, item_name, item_flag=Fals
                 job, race, sex, sort, time
             )
 
-        r = requests.get(src_url, headers=headers, timeout=5)
+        r = requests.get(src_url, headers=headers, timeout=10)
         r = r.json()
         if r["flag"] == 200:
             i = random.randint(0, len(r["array"]) - 1)
@@ -170,11 +170,13 @@ def search_jr(job, race, sex, sort, time, bot_version, item_name, item_flag=Fals
             img = result_to_img(result, glamour_id, bot_version)
         else:
             print(r)
+            logging.info(r)
             img = "未能筛选到结果，请尝试更改筛选信息，\n职业：{}\n种族：{}\n性别：{}\n装备名称：{}".format(
                 job, race, sex, item_name
             )
         return img
     except Exception as e:
+        logging.error(e)
         return "Error: {}".format(type(e))
 
 

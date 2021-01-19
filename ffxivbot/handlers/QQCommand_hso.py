@@ -9,6 +9,9 @@ import feedparser
 import traceback
 import requests
 import time
+import math
+import difflib
+import urllib.parse
 from bs4 import BeautifulSoup
 
 
@@ -46,38 +49,61 @@ def QQCommand_hso(*args, **kwargs):
                 else:
                     msg = '请输入"/hso add $name1 $name2"将$name1替换成$name2'
             else:
-                if random.randint(0, 10) == 0:
-                    msg = "好色哦"
-                else:
-                    page = random.randint(1, 50)
-                    params = "limit=20&page={}".format(page)
-                    if second_command_msg != "":
-                        alter_tags = HsoAlterName.objects.all()
-                        for alter in alter_tags:
-                            second_command_msg = second_command_msg.replace(
-                                alter.name, alter.key
+                random.seed(time.time())
+                page = random.randint(1, 50)
+                params = "limit=20&page={}".format(page)
+                if second_command_msg != "":
+                    alter_tags = HsoAlterName.objects.all()
+                    replaced = False
+                    tag_backup = second_command_msg.strip()
+                    tags = second_command_msg.strip().split(" ")
+                    for alter in alter_tags:
+                        if alter.name in tags:
+                            tags[tags.index(alter.name)] = alter.key
+                            replaced = True
+                    corrector = TagCompletion(os.path.join(os.path.dirname(os.path.abspath(__file__)), "resources", "konachan_tags.json"))
+                    tags = list(map(corrector.select_tag, tags))
+                    if tags:
+                        count = 0
+                        if len(tags) == 1:
+                            count = corrector.freq(tags[0])
+                        params = (
+                            "limit=100&"
+                            if count <= 100
+                            else "page={}&".format(
+                                random.randint(1, math.ceil(count / 100))
                             )
-                        params = "tags={}".format(second_command_msg)
-                    api_url = "https://konachan.com/post.json?{}".format(params)
-                    # print(api_url+"===============================================")
-                    r = requests.get(api_url, timeout=(5, 60))
-                    img_json = json.loads(r.text)
-
-                    if receive["message_type"] == "group":
-                        tmp_list = []
-                        for item in img_json:
-                            if item["rating"] == "s":
-                                tmp_list.append(item)
-                        img_json = tmp_list
-
-                    if len(img_json) == 0:
-                        msg = "未能找到所需图片"
+                        )
+                        params += "tags={}".format("+".join(list(
+                            map(urllib.parse.quote, tags)
+                        )))
                     else:
-                        idx = random.randint(0, len(img_json) - 1)
-                        img = img_json[idx]
-                        msg = "[CQ:image,file={}]".format(img["sample_url"])
-                        user.last_api_time = time.time()
-                        user.save(update_fields=["last_api_time"])
+                        tags = [random.choice(list(corrector.TAGS.keys()))]
+                        params = "tags={}".format(tags[0])
+                    msg = (
+                        'Tag: "{}" -> "{}"\n'.format(tag_backup, tags[0])
+                        if tag_backup != " ".join(tags)
+                        else ""
+                    )
+                api_url = "https://konachan.com/post.json?{}".format(params)
+                # print(api_url + "\n===============================================")
+                r = requests.get(api_url, timeout=(5, 60))
+                img_json = r.json()
+
+                if receive["message_type"] == "group":
+                    tmp_list = []
+                    for item in img_json:
+                        if item["rating"] == "s":
+                            tmp_list.append(item)
+                    img_json = tmp_list
+
+                if not img_json:
+                    msg += "未能找到所需图片"
+                else:
+                    img = random.choice(img_json)
+                    msg += "[CQ:image,file={}]".format(img["sample_url"])
+                    user.last_api_time = time.time()
+                    user.save(update_fields=["last_api_time"])
 
         reply_action = reply_message_action(receive, msg)
         action_list.append(reply_action)
@@ -87,3 +113,4 @@ def QQCommand_hso(*args, **kwargs):
         action_list.append(reply_message_action(receive, msg))
         logging.error(e)
         traceback.print_exc()
+    return []

@@ -49,7 +49,7 @@ LOGGER = logging.getLogger(__name__)
 
 
 class PikaConsumer(object):
-    """This is based on the example consumer at
+    """This is based on the example consumer at 
     https://github.com/pika/pika/blob/master/examples/asynchronous_consumer_example.py
     """
 

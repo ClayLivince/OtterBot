@@ -56,10 +56,10 @@ def QQCommand_image(*args, **kwargs):
         msg_list = receive_msg.split(" ")
         second_command = msg_list[0]
         if second_command == "" or second_command == "help":
-            msg = " 禁止上传R18/NSFW图片：\n/image upload $category $image : 给类别$category上传图片\n/image $category : 随机返回一张$category的图片\n/image del $name : 删除名为$name的图片\n查看图库：https://xn--v9x.net/image/\nPowered by https://sm.ms"
+            msg = " 禁止上传R18/NSFW图片：\n/image upload $category $image : 给类别$category上传图片\n/image $category : 随机返回一张$category的图片\n/image del $name : 删除名为$name的图片\n查看图库：https://xn--v9x.net/image/\nhttps://tata.cyanclay.xyz/image/\nPowered by https://sm.ms"
         elif second_command == "upload":
             if len(msg_list) < 3:
-                msg = "您输入的参数个数不足：\n/image upload $category $image : 给类别$category上传图片"
+                msg = "您输入的参数个数不足：\n/image upload $category $image : 给类别$category上传图片, 请注意，category之后，图片之前，需要加一个空格。"
             else:
                 (qquser, created) = QQUser.objects.get_or_create(
                     user_id=receive["user_id"]
@@ -151,29 +151,21 @@ def QQCommand_image(*args, **kwargs):
                 category = category[1:]
             get_info = "info" in category
             category = category.replace("info", "", 1)
-            found = False
-            tries = 0
-            while not found and tries < 10:
-                tries += 1
-                imgs = Image.objects.filter(key=category)
-                if not imgs.exists():
+            if random.random() > 0.5:
+                msg, status = load_remote_image(category, get_info)
+                if msg is None:
+                    msg, status = load_local_image(category, get_info)
+            else:
+                msg, status = load_local_image(category, get_info)
+                if msg is None:
+                    msg, status = load_remote_image(category, get_info)
+            if msg is None:
+                if status == -1:
                     msg = '未找到类别"{}"的图片'.format(category)
-                    found = True
+                elif status == 404:
+                    msg = "本次请求的图片被图床删掉了 = =\n再试一次吧~~"
                 else:
-                    img = random.sample(list(imgs), 1)[0]
-                    img_url = img.domain + img.path
-                    r = requests.head(img_url, timeout=3)
-                    if r.status_code == 404:
-                        img.delete()
-                        print("deleting {}".format(img))
-                        msg = "本次请求的图片被图床删掉了 = =\n再试一次吧~~"
-                    else:
-                        found = True
-                        msg = "[CQ:image,cache=0,file={}]\n".format(img_url)
-                        if get_info:
-                            msg += "{}\nCategory:{}\nUploaded by:{}\n".format(
-                                img.name, img.key, img.add_by
-                            )
+                    msg = '出现问题：{}\n5开头的错误是图床服务器错误，请耐心等待。'.format(status)
         msg = msg.strip()
         reply_action = reply_message_action(receive, msg)
         action_list.append(reply_action)
@@ -184,3 +176,86 @@ def QQCommand_image(*args, **kwargs):
         logging.error(e)
         traceback.print_exc()
     return action_list
+
+
+def load_local_image(category, get_info):
+    found = False
+    tries = 0
+    msg = None
+    status = 0
+    while not found and tries < 10:
+        tries += 1
+        imgs = Image.objects.filter(key=category)
+        if not imgs.exists():
+            msg = None
+            status = -1
+            found = True
+        else:
+            img = random.sample(list(imgs), 1)[0]
+            img_url = img.get_url()
+            r = requests.head(img_url, timeout=3)
+            if r.status_code == 404:
+                img.delete()
+                print("deleting {}".format(img))
+                msg = None
+                status = 404
+            else:
+                found = True
+                msg = "[CQ:image,cache=0,file={}]\n".format(img_url)
+                if get_info:
+                    msg += "Name:{}\nCategory:{}\nUploader:{}\n".format(
+                        img.name, img.key, img.add_by
+                    )
+                    msg += "From:Local"
+                status = 1
+    if status == 0:
+        status = -1
+    return msg, status
+
+
+def load_remote_image(category, get_info):
+    found = False
+    tries = 0
+    url = "http://xn--v9x.net/image/"
+    msg = None
+    status = 0
+
+    payload = "{\"optype\":\"get_images\",\"category\":\"" + category + "\",\"cached_images\":[]}"
+    headers = {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json, */*; q=0.01',
+        'X-Requested-With': 'XMLHttpRequest',
+        'X-CSRFToken': '4ordA2HawT3bFUwfjNTf8OUJ5LdWh3N0de12NHgzAkuYGN8LNNzK7zJmVMLipBdy',
+        'Cookie': 'csrftoken=UKuQbNIIkE5TB7M7iRykr78lz6REcJmz3A4Fosh7o5wGC0oDMRePqSXYp7p0khM7; sessionid=2un89owgd5gdsxouhthovvc7eduaiknk',
+    }
+
+    response = requests.request("POST", url, headers=headers, data=payload.encode('utf-8'))
+
+    if response.status_code != 200:
+        msg = None
+        status = response.status_code
+    else:
+        contents = json.loads(response.text)
+        if not contents:
+            msg = None
+            status = -1
+        else:
+            while not found and tries < 10 and tries < len(contents['images']):
+
+                img = contents['images'][tries]
+
+                r = requests.head(img['url'], timeout=3)
+                if r.status_code == 404:
+                    msg = None
+                    status = 404
+                else:
+                    found = True
+                    msg = "[CQ:image,cache=0,file={}]\n".format(img['url'])
+                    if get_info:
+                        msg += img['info']
+                        msg += "\nFrom:Remote"
+                    status = 1
+                tries += 1
+        if status == 0:
+            status = -1
+    return msg, status

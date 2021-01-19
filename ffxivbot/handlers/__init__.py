@@ -2,48 +2,62 @@ from .QQEventHandler import QQEventHandler
 from .QQGroupEventHandler import QQGroupEventHandler
 
 commands = {
+    "图片相关": "--------------------------------------------",
     "/cat": "云吸猫",
     "/gakki": "云吸gakki",
     "/10": "云吸十元",
     "/bird": "云吸飞鸟",
     "/waifu": "云吸二次元老婆",
     "/image": "獭獭传图",
-    "/comment": "给作者留言",
-    "/about": "关于此项目",
-    "/donate": "援助作者",
-    "/random": "掷骰子",
-    "/chp": "彩虹屁",
-    "/anime": '以图搜番（"/anime 图片"）',
     "/gif": '生成沙雕图（"/gif help"）',
-    "/dice": 'DnD掷骰子（"/dice 3d12"）',
-    "/pixiv": 'Pixiv相关功能（"/pixiv help"）',
-    # "/music":"网易云音乐搜索（\"/music 届不到的恋\"）",
-    "/duilian": '对联（"/duilian 稻花香里说丰年"）',
-    "/tex": '生成tex图片（"/tex e^{\\pi i}+1=0"）',
-    "/gate": '挖宝选门（"/gate 3"）',
-    "/treasure": "宝图搜寻",
+    "/pixiv": 'Pixiv相关功能（"/pixiv help"）（暂时无法使用）',
+    "/anime": '以图搜番（"/anime 图片"）（暂时无法使用）',
+    "/hso": "好色哦\n-",
+
+    "游戏相关": "--------------------------------------------",
     "/search": '查询物品("/search 神龙")',
-    "/market": '交易板数据("/market item 2级刚力之幻药")',
+    "/market": '交易板数据("/mitem 2级刚力之幻药")',
     "/weather": '天气信息("/weather 优雷卡恒冰之地")',
     "/fsx": '副属性计算（"/fsx 直击"）',
     "/dps": 'DPS排名（"/dps 8s 骑士"）',
     "/raid": '零式英雄榜（"/raid 蓝色裂痕 萌芽池"）',
     "/quest": '任务查询("/quest 狂乱前奏")',
-    "/nuannuan": "本周金蝶暖暖作业",
-    "/hso": "好色哦",
-    "/hhsh": "好好说话",
-    "/bot": "机器人相关功能",
-    "/ifttt": "IFTTT推送系统",
+    "/nuannuan": "本周金蝶暖暖作业，可缩略为/nn",
+    "/hh": '光之收藏家幻化推荐("/hh help")',
+    "/ofish": "获取最近海钓航班",
+    "/gate": '挖宝选门（"/gate 3"）',
+    "/treasure": "宝图搜寻（部分獭獭不支持）\n-",
+
+    "其他有用的": "--------------------------------------------",
+    "/luck": "浅草寺求签",
+    "/music": "网易云音乐搜索（\"/music 届不到的恋\"）",
+    "/mxh": '梅溪湖cp短打生成器（"/mxh 海德林 佐迪亚克"）\n-',
+    "骰娘相关": "输入.help 来查询骰娘相关指令 由Dice插件提供支持。若机器人未安装则不能使用。",
+
+    "其他没用的": "--------------------------------------------",
+    "/chp": "彩虹屁",
+    "/hhsh": "好好说话，输入缩写，查询词语可能的含义。如/hhsh yysy",
+    "/random": "掷骰子，1000点以内随机，与游戏内相同。",
+    "/dice": 'DnD掷骰子（"/dice 3d12"）',
+    "/duilian": '对联（"/duilian 稻花香里说丰年"）',
+    "/tex": '生成tex图片（"/tex e^{\\pi i}+1=0"）',
     "/akhr": "罗德岛公开招募",
     "/share": "发送微博分享",
     # "/trash":"你是什么垃圾？",
     "/shorten": "微博短链",
-    # "/mxh": '梅溪湖cp短打生成器（"/mxh 海德林 佐迪亚克"）',
+    "/abv": "Bilibili av/BV号互转\n-",
+
     # "/joke":"讽刺笑话（\"/joke 996|强东|建设一流公司|程序员|公司\"）",
-    "/hh": '光之收藏家幻化推荐("/hh help")',
-    "/ofish": "获取最近海钓航班",
-    "/luck": "浅草寺求签",
-    "/abv": "Bilibili av/BV号互转",
+    "管理相关": "--------------------------------------------",
+    "/help group": "查看群聊相关功能帮助。包括微博与直播订阅。",
+    "/about": "关于此项目",
+    "/donate": "援助作者",
+    "/comment": "给作者留言",
+    "/bot": "机器人相关功能",
+    "/ifttt": "IFTTT推送系统",
+    "使用手册": "具体介绍详见https://github.com/Bluefissure/OtterBot/wiki\n*" +
+            "群聊相关功能帮助未列出，请使用/help group查询。\n*若出现运行问题，请联系QQ 958973141。\n",
+
 }
 
 group_commands = {
@@ -52,15 +66,16 @@ group_commands = {
     "/custom_reply": "添加自定义命令",
     "/repeat_ban": "复读姬口球系统",
     "/repeat": "开启复读姬系统",
-    "/left_reply": "聊天限额剩余情况",
+    "/left_reply": "聊天限额剩余情况（没有用）",
     "/ban": "投票禁言",
     "/revenge": "复仇",
     "/vote": "投票系统",
-    "/weibo": "微博订阅系统",
-    "/live": "直播订阅系统",
+    "/weibo": "微博订阅系统，请联系机器人管理员添加，直接使用可能无效。",
+    "/live": "直播订阅系统，请联系机器人管理员添加，直接使用可能无效。",
     "/command": "群功能停用/启用",
     "/lottery": "抽奖",
-    "/hunt": "狩猎",
+    "/hunt": "狩猎（用不了了已经）",
+    "/wordcloud": "聊天词云",
 }
 
 alter_commands = {
@@ -132,8 +147,8 @@ from .QQCommand_image import QQCommand_image
 from .QQCommand_luck import QQCommand_luck
 
 # from .QQCommand_joke import QQCommand_joke
-# from .QQCommand_music import QQCommand_music
-# from .QQCommand_mxh import QQCommand_mxh
+from .QQCommand_music import QQCommand_music
+from .QQCommand_mxh import QQCommand_mxh
 from .QQCommand_pixiv import QQCommand_pixiv
 from .QQCommand_random import QQCommand_random
 from .QQCommand_share import QQCommand_share
@@ -165,5 +180,6 @@ from .QQGroupCommand_live import QQGroupCommand_live
 from .QQGroupCommand_lottery import QQGroupCommand_lottery
 from .QQGroupCommand_command import QQGroupCommand_command
 from .QQGroupCommand_hunt import QQGroupCommand_hunt
+from .QQGroupCommand_wordcloud import QQGroupCommand_wordcloud
 
 from .QQGroupChat import QQGroupChat

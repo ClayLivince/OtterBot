@@ -78,6 +78,7 @@ def get_market_data(server_name, item_name, hq=False):
     print("market url:{}".format(url))
     r = requests.get(url, timeout=3)
     if r.status_code != 200:
+        msg = ""
         if r.status_code == 404:
             msg = "请确认所查询物品可交易且不可在NPC处购买\n"
         msg += "Error of HTTP request (code {}):\n{}".format(r.status_code, r.text)
@@ -125,7 +126,7 @@ def handle_item_name_abbr(item_name):
     if item_name.upper() == "G9":
         item_name = "陈旧的迦迦纳怪鸟革地图"
     if item_name.upper() == "G8":
-        item_name = "陈旧的巨龙革地图图"
+        item_name = "陈旧的巨龙革地图"
     if item_name.upper() == "G7":
         item_name = "陈旧的飞龙革地图"
     return item_name
@@ -142,14 +143,15 @@ Powered by https://universalis.app"""
         # if time.time() < user.last_api_time + user.api_interval:
         # print("current time:{}".format(time.time()))
         # print("last_api_time:{}".format(user.last_api_time))
-        if time.time() < user.last_api_time + 15:
-            msg = "[CQ:at,qq={}] 技能冷却中，请勿频繁调用".format(user.user_id)
-            return msg
+        
         server = None
-        if len(command_seg) != 3:
-            msg = "参数错误：\n/market item $name $server: 查询$server服务器的$name物品交易数据"
-            return msg
-        server_name = command_seg[-1]
+        server_name = None
+        if len(command_seg) < 2:
+            msg = "参数错误：\n/market item $name $server: 查询$server服务器的$name物品交易数据，不输入服务器，默认查询鸟区物价"
+            return msg    
+        else:
+            server_name = command_seg[-1]
+            item_name = " ".join(command_seg[1:-1])
         if server_name == "陆行鸟" or server_name == "莫古力" or server_name == "猫小胖":
             pass
         elif server_name == "鸟":
@@ -159,12 +161,11 @@ Powered by https://universalis.app"""
         elif server_name == "猫":
             server_name = "猫小胖"
         else:
-            pass
-            # server = Server.objects.filter(name=server_name)
-            # if not server.exists():
-            #     msg = '找不到服务器"{}"'.format(server_name)
-            #     return msg
-        item_name = " ".join(command_seg[1:-1])
+            server = Server.objects.filter(name=server_name)
+            if not server.exists():
+                server_name = "陆行鸟"
+                item_name = " ".join(command_seg[1:])
+
         hq = "hq" in item_name or "HQ" in item_name
         if hq:
             item_name = item_name.replace("hq", "", 1)
