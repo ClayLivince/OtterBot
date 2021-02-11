@@ -1,3 +1,5 @@
+from json.decoder import JSONDecodeError
+
 from .QQEventHandler import QQEventHandler
 from .QQUtils import *
 from ffxivbot.models import *
@@ -56,7 +58,7 @@ def QQCommand_image(*args, **kwargs):
         msg_list = receive_msg.split(" ")
         second_command = msg_list[0]
         if second_command == "" or second_command == "help":
-            msg = " 禁止上传R18/NSFW图片：\n/image upload $category $image : 给类别$category上传图片\n/image $category : 随机返回一张$category的图片\n/image del $name : 删除名为$name的图片\n查看图库：https://xn--v9x.net/image/\nhttps://tata.cyanclay.xyz/image/\nPowered by https://sm.ms"
+            msg = " 禁止上传R18/NSFW图片：\n/image upload $category $image : 给类别$category上传图片\n/image $category : 随机返回一张$category的图片\n/image random : 返回一张远程图库的随机图片\n/image del $name : 删除名为$name的图片\n查看图库：https://xn--v9x.net/image/\nhttps://tata.cyanclay.xyz/image/\nPowered by https://sm.ms"
         elif second_command == "upload":
             if len(msg_list) < 3:
                 msg = "您输入的参数个数不足：\n/image upload $category $image : 给类别$category上传图片, 请注意，category之后，图片之前，需要加一个空格。"
@@ -145,6 +147,8 @@ def QQCommand_image(*args, **kwargs):
                     for img in imgs:
                         img.delete()
                     msg = '图片"{}"删除完毕'.format(name)
+        elif second_command == "random":
+            msg, status = load_remote_image("", False)
         else:
             category = msg_list[0].strip()
             if category.startswith("$"):
@@ -172,6 +176,8 @@ def QQCommand_image(*args, **kwargs):
         return action_list
     except Exception as e:
         msg = "Error: {}".format(type(e))
+        if e is JSONDecodeError:
+            msg += "\n大概率是远程图库登录过期了，烦请稍候再试！"
         action_list.append(reply_message_action(receive, msg))
         logging.error(e)
         traceback.print_exc()
@@ -225,8 +231,8 @@ def load_remote_image(category, get_info):
         'Content-Type': 'application/json',
         'Accept': 'application/json, */*; q=0.01',
         'X-Requested-With': 'XMLHttpRequest',
-        'X-CSRFToken': '4ordA2HawT3bFUwfjNTf8OUJ5LdWh3N0de12NHgzAkuYGN8LNNzK7zJmVMLipBdy',
-        'Cookie': 'csrftoken=UKuQbNIIkE5TB7M7iRykr78lz6REcJmz3A4Fosh7o5wGC0oDMRePqSXYp7p0khM7; sessionid=2un89owgd5gdsxouhthovvc7eduaiknk',
+        'X-CSRFToken': 'BhkQ71vFJHxN9DzaRncS4wExmbru5ZdDhrlboJCNwJJhWf1uKQ0H8sNx3RPVwnKu',
+        'Cookie': 'csrftoken=W9l5LsUXDPuNwETx50Fz12BheeTug3uoCjmq2a15qRGhjglRYtto5YKhVUhVHr1f; sessionid=m88151bhnfny58xaz1cvtwfc8dhhwx71',
     }
 
     response = requests.request("POST", url, headers=headers, data=payload.encode('utf-8'))
