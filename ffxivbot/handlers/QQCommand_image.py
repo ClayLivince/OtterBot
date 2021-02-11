@@ -3,6 +3,7 @@ from json.decoder import JSONDecodeError
 from .QQEventHandler import QQEventHandler
 from .QQUtils import *
 from ffxivbot.models import *
+from django.db.models import Q
 import logging
 import json
 import random
@@ -53,6 +54,7 @@ def QQCommand_image(*args, **kwargs):
         QQ_BASE_URL = global_config["QQ_BASE_URL"]
         SMMS_TOKEN = global_config.get("SMMS_TOKEN", "")
         receive = kwargs["receive"]
+        bot = kwargs["bot"]
 
         receive_msg = receive["message"].replace("/image", "", 1).strip()
         msg_list = receive_msg.split(" ")
@@ -69,9 +71,7 @@ def QQCommand_image(*args, **kwargs):
                 if not qquser.able_to_upload_image:
                     msg = "[CQ:at,qq={}] 您由于触犯规则无权上传图片".format(receive["user_id"])
                 else:
-                    category = msg_list[1].strip()
-                    if category.startswith("$"):
-                        category = category[1:]
+                    category = msg_list[1].strip().strip("$")
                     CQ_text = msg_list[2].strip()
                     img_url = get_image_from_CQ(CQ_text)
                     if not img_url:
@@ -98,7 +98,7 @@ def QQCommand_image(*args, **kwargs):
                                 while "/" in name:
                                     name = name[name.find("/") + 1 :]
                                 try:
-                                    img = Image.objects.get(path=path)
+                                    img = Image.objects.get(domain=domain, path=path)
                                     msg = '图片"{}"已存在于类别"{}"之中，无法重复上传'.format(
                                         img.name, img.key
                                     )
@@ -110,7 +110,9 @@ def QQCommand_image(*args, **kwargs):
                                         path=path,
                                         img_hash="null",
                                         timestamp=int(time.time()),
+                                        url=url,
                                         add_by=qquser,
+                                        add_by_bot=bot,
                                     )
                                 img.save()
                                 msg = '图片"{}"上传至类别"{}"成功'.format(img.name, img.key)
@@ -129,6 +131,7 @@ def QQCommand_image(*args, **kwargs):
                                 timestamp=img_info.get("timestamp", 0),
                                 url=url,
                                 add_by=qquser,
+                                add_by_bot=bot,
                             )
                             img.save()
                             msg = '图片"{}"上传至类别"{}"成功'.format(img.name, img.key)
@@ -140,7 +143,10 @@ def QQCommand_image(*args, **kwargs):
                 (qquser, created) = QQUser.objects.get_or_create(
                     user_id=receive["user_id"]
                 )
-                imgs = Image.objects.filter(name=name, add_by=qquser)
+                imgs = Image.objects.filter(
+                    Q(name=name),
+                    Q(add_by=qquser) | Q(add_by_bot__owner_id=qquser.user_id),
+                )
                 if not imgs.exists():
                     msg = '未找到名为"{}"的图片或您无权删除这张图片'.format(name)
                 else:

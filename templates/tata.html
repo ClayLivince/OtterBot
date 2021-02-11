@@ -114,14 +114,18 @@
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">
-            <h4 class="modal-title" id="TOSTitle">配置下载</h4>
+            <h4 class="modal-title" id="ConfTitle">配置下载</h4>
             <button type="button" class="close" data-dismiss="modal" aria-label="Close">
               <span aria-hidden="true">x</span>
             </button>
           </div>
-          <div class="modal-body" id="TOSContent">
+          <div class="modal-body">
+            <div class="alert alert-warning" style="display: none;" id="GoCqhttpAlert">
+              <h5><i class="icon fas fa-exclamation-triangle"></i> 注意！</h5>
+              Go-cqhttp 需要下载配置文件后手动将机器人登录密码填入 password 字段中。
+            </div>
             <div style="display: none;">
-              <label for="accessToken">Bot Id</label>
+              <label for="botId">Bot Id</label>
               <input type="text" class="form-control" id="downloadConfBotId" readonly="readonly">
             </div>
             <div>
@@ -130,13 +134,16 @@
             </div>
             <div class="form-group">
               <label>客户端</label>
-              <select class="form-control" id="downloadConfClient">
+              <select class="form-control" id="downloadConfClient" onchange="clientChanged()">
                 <option>Mirai</option>
                 <option>OICQ</option>
+                <option>YaYa</option>
+                <option>Go-cqhttp</option>
               </select>
             </div>
           </div>
           <div class="modal-footer">
+            <button type="button" class="btn btn-info mr-auto" onclick="href_guide()">指南</button>
             <button type="button" class="btn btn-primary" onclick="download_conf()">下载</button>
           </div>
         </div><!-- /.modal-content -->
@@ -210,14 +217,14 @@
               <div class="direct-chat-msg">
                 <div class="direct-chat-info clearfix">
                   <span class="direct-chat-name pull-left">Bluefissure</span>
-                  <span class="direct-chat-timestamp pull-right">2020-3-9 11:38:51</span>
+                  <span class="direct-chat-timestamp pull-right">2020-11-27 10:49:31</span>
                 </div>
                 <!-- /.direct-chat-info -->
                 <img class="direct-chat-img" src="{% static "dist/img/bluefissure.jpg" %}" alt="message user image">
                 <!-- /.direct-chat-img -->
                 <div class="direct-chat-text">
-                  请将酷Q的HTTPAPI插件升级至<a href="https://github.com/richardchien/coolq-http-api/releases/tag/v4.14.1"
-                    target="_blank">4.14.1</a>版本使用服务，服务器禁止了老版本客户端的连接。
+                  请参考<a href="https://github.com/Bluefissure/OtterBot/wiki/%E9%A2%86%E5%85%BB%E6%96%87%E6%A1%A3"
+                    target="_blank">Wiki</a>使用本服务。
                 </div>
                 <!-- /.direct-chat-text -->
               </div>
@@ -417,6 +424,15 @@
     })
   });
 
+  function clientChanged() {
+    var client = $("#downloadConfClient").val();
+    if (client == "Go-cqhttp") {
+      $("#GoCqhttpAlert").css("display", "");
+    } else {
+      $("#GoCqhttpAlert").css("display", "none");
+    }
+  }
+
   function switch_public(id) {
     var token = prompt("请输入Token:");
     $.ajax({
@@ -463,6 +479,17 @@
     });
   }
 
+  function href_guide() {
+    var client = $("#downloadConfClient").val();
+    var clientGuideMap = {
+      "Mirai": "https://github.com/Bluefissure/OtterBot/wiki/Mirai",
+      "OICQ": "https://github.com/Bluefissure/OtterBot/wiki/OICQ",
+      "YaYa": "https://github.com/Bluefissure/OtterBot/wiki/%E5%85%88%E9%A9%B1%E7%8D%AD",
+      "Go-cqhttp": "https://github.com/Bluefissure/OtterBot/wiki/Go-cqhttp",
+    };
+    window.open(clientGuideMap[client], '_blank');
+  }
+
   function download_conf(id) {
     id = $("#downloadConfBotId").val();
     var token = $("#downloadConfToken").val();
@@ -477,7 +504,13 @@
     request.onload = function(e) {
       if (this.status === 200) {
         var blob = this.response;
-        var fileName = client === "Mirai" ? "setting.yml" : "config.js";
+        var clientConfigMap = {
+          "Mirai": "settings.yml",
+          "OICQ": "config.js",
+          "YaYa": "config.yml",
+          "Go-cqhttp": "config.hjson",
+        };
+        var fileName = clientConfigMap[client];
         // console.log(blob);
         if (window.navigator.msSaveOrOpenBlob) {
           window.navigator.msSaveBlob(blob, fileName);
